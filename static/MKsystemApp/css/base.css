@@ -1,0 +1,77 @@
+:root {
+    --font-family-sans-serif: "Helvetica Neue", Helvetica, Arial, "游ゴシック体", "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+    font-family: Meiryo, "Helvetica Neue", Helvetica, Arial, "游ゴシック体", "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", 'Open Sans', sans-serif;
+}
+
+.logo img {
+    width: 100%;
+}
+
+.maintenance {
+    display: block;
+    height: 500px;
+    font-size: 2em;
+    text-align: center;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    display: none;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.cv-spinner {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px #ddd solid;
+    border-top: 4px #2e93e6 solid;
+    border-radius: 50%;
+    animation: sp-anime 0.8s infinite linear;
+}
+
+@keyframes sp-anime {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.superuser-menu {
+    position: relative;
+    /* margin: 2em 0; */
+    padding: 40px 10px 20px;
+    border: solid 2px rgba(0, 0, 0, 0.2);
+}
+
+.superuser-menu .box-title {
+    position: absolute;
+    display: inline-block;
+    top: 0px;
+    left: 0px;
+    padding: 0 9px;
+    height: 25px;
+    line-height: 25px;
+    font-size: 17px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.errorlist li {
+    color: red;
+}

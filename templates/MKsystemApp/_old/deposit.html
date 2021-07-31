@@ -1,0 +1,164 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %}{% block content %}
+<link href="{% static 'MKsystemApp/css/deposit.css' %}" rel="stylesheet">
+<div class="mx-auto mt-5 p-4 w-full overflow-x-auto">
+
+    <table class="table">
+        <thead class="thead-light">
+            <tr class="">
+                <th class="text-center">ランク</th>
+                <th class="text-center">ID</th>
+                <th class="text-center">姓</th>
+                <th class="text-center">名</th>
+                <th class="text-center">資産</th>
+                <th class="text-center">操作</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in object_list %}
+            <tr class="border">
+                <td class="text-center px-2">{{ u.rank }}</td>
+                <td class="text-center px-2">{{ u.user_id }}</td>
+                <td class="text-center px-2">{{ u.family_name }}</td>
+                <td class="text-center px-2">{{ u.first_name }}</td>
+                <!-- <td id="deposit-{{ u.user_id }}" class="text-center px-2">{{ u.asset }} BTC</td> -->
+                <td id="deposit-{{ u.user_id }}" class="text-center px-2">
+                        {% for asset in asset_list %} 
+                            {% if asset.user_id == u.user_id %} 
+                                {{ asset.asset }} BTC
+                            {% endif %} 
+                        {% endfor %}
+                </td>
+                <td class="text-center">
+                    <!-- form-inlineで横並びにしたいが上手くいかない -->
+                    <form method="POST" class="form-inline deposit-form">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input id="input-{{ u.user_id }}" class="form-control mr-1">
+                            <div id="button-{{ u.user_id }}" class="btn btn-primary" type="submit">入金</button>
+                        </div>
+                    </form>
+                    <!-- {{ form.asset }}が出せない -->
+                    <!-- <form method="post" class="form-inline deposit-form">
+                        {{ form.asset }}
+                    </form> -->
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    <!-- モーダルウィンドウ -->
+    <dialog>
+        <p>入金額は0.0001BTC以上にしてください。</p>
+        <div id="modalclose" class="btn btn-secondary">OK</div>
+    </dialog>
+</div>
+{% endblock %} {% block style %}
+<style>
+    th,
+    td {
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    // モーダルウィンドウ
+    var dialog = document.querySelector('dialog');
+    var btn_close = document.getElementById('modalclose');
+    btn_close.addEventListener('click', function() {
+        dialog.close();
+    }, false);
+
+    function showmodal(){
+        dialog.showModal();
+    }
+
+    // 入金ボタンを押したとき
+    $('div[id^="button-"]').on('click', function(event) {
+        // alert($(this).prev().value);
+        
+        var operate_id = this.id.replace("button-", "");
+        // 入金額の取得
+        var input_value = $("#input-" + operate_id).val();
+        if(input_value < 0.0001){
+            showmodal();
+            return;
+        }
+        $('div[id^="button-"]').attr("disabled", true);
+        $("#overlay").fadeIn(300);
+
+        // event.preventDefault();
+        // var form = $(this);
+        var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        $.ajax({
+                url: "changedeposit",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $crf_token
+                },
+                data: {
+                    user_id: operate_id,
+                    deposit_value: input_value
+                },
+                // method: form.prop("method"),
+                // data: form.serialize(),
+                timeout: 3000,
+                dataType: "text",
+                cache: false,
+                beforeSend: function(xhr) {
+                    // 選択不可にする
+                    $('div[id^="button-"]').attr("disabled", true);
+                }
+            })
+            .done(function(data) {
+                $("#overlay").fadeOut(300);
+                // 設定値を反映する
+                $("#deposit-" + operate_id).hide();
+                $("#deposit-" + operate_id).html(data);
+                $("#deposit-" + operate_id).fadeIn("    ");
+                // 選択可能にする
+                $('div[id^="button-"]').attr("disabled", false);
+            })
+    });
+
+    // 何故かsubmitのPOSTはできない
+    // $('button[id^="button-"]').submit(function(event) {
+    //     // alert($(this).prev().value);
+    //     var operate_id = this.id.replace("button-", "");
+    //     // 入金額の取得
+    //     var input_value = $("#input-" + operate_id).val();
+
+    //     $('button[id^="button-"]').attr("disabled", true);
+    //     $("#overlay").fadeIn(300);
+
+    //     event.preventDefault();
+    //     var form = $(this);
+    //     // var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+    //     $.ajax({
+    //             url: "changedeposit",
+    //             // method: "POST",
+    //             // headers: {
+    //             //     "X-CSRFToken": $crf_token
+    //             // },
+    //             method: form.prop("method"),
+    //             data: form.serialize(),
+    //             timeout: 10000,
+    //             dataType: "text",
+    //             cache: false,
+    //             beforeSend: function(xhr) {
+    //                 // 選択不可にする
+    //                 $('button[id^="button-"]').attr("disabled", true);
+    //             }
+    //         })
+    //         .done(function(data) {
+    //             $("#overlay").fadeOut(300);
+    //             // 設定値を反映する
+    //             $("#deposit-" + operate_id).html(data);
+    //             // 選択可能にする
+    //             $('button[id^="button-"]').attr("disabled", false);
+    //         })
+    // });
+</script>
+{% endblock %}

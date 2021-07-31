@@ -1,0 +1,27 @@
+{% extends 'MKsystemApp/base.html' %} {% block content %}
+<h2>出金履歴</h2>
+<!-- <div class="maintenance">※メンテナンス中</div> -->
+
+<div class="mx-auto mt-5 p-4 w-full overflow-x-auto">
+    <table class="table">
+        <thead class="thead-light">
+            <tr class="text-center">
+                <th>日時</th>
+                <th>出金額(BTC)</th>
+                <th>状況</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in object_list %}
+            <tr class="border">
+                <td class="text-center px-2">{{ u.date|date:'Y-m-d H:m' }}</td>
+                <td class="text-center px-2">{{ u.value }}</td>
+                <td class="text-center px-2">{{ u.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% include "MKsystemApp/components/pagination.html" %}
+</div>
+{% endblock %}

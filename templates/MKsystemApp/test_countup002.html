@@ -1,0 +1,34 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %} {% block content %}
+
+<h1>カウントアップ</h1>
+<p class="count" data-num="100">0</p>
+
+<script>
+    $(function() {
+        var countElm = $('.count'),
+            countSpeed = 10;
+
+        countElm.each(function() {
+            var self = $(this),
+                countMax = self.attr('data-num'),
+                thisCount = self.text(),
+                countTimer;
+
+            function timer() {
+                countTimer = setInterval(function() {
+                    thisCount++;
+                    self.text(thisCount);
+
+                    if (thisCount == countMax) {
+                        clearInterval(countTimer);
+                    }
+                }, countSpeed);
+            }
+            timer();
+        });
+
+    });
+</script>
+
+
+{% endblock %}

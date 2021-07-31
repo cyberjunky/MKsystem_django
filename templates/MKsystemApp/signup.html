@@ -1,0 +1,23 @@
+{% extends 'MKsystemApp/base.html' %} {% block content %}
+<div class="bg-white mx-auto mt-5 p-4 shadow" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %} {{ form }}
+        <div class="mt-3">
+            <button class="btn btn-primary">登録</button>
+        </div>
+    </form>
+</div>
+<script>
+    // 画面が読み込まれてエラーが出てたらスクロールする
+    $(window).on('load', function() {
+        // 要素がないときは何もしない
+        // alert($(".errorlist").length);
+        if ($(".errorlist").length == 0) {
+            return
+        }
+        $("html,body").animate({
+            scrollTop: $(".errorlist").offset().top
+        }, 200);
+    });
+</script>
+{% endblock %}

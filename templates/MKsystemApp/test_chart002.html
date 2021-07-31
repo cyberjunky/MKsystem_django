@@ -1,0 +1,49 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %} {% block content %}
+
+<h1>折れ線グラフ</h1>
+<canvas id="chart-profit"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+
+<script>
+    var ctx = document.getElementById("chart-profit");
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            // labels: ['8月1日', '8月2日', '8月3日', '8月4日', '8月5日', '8月6日', '8月7日'],
+            datasets: [{
+                label: '',
+                data: [35, 34, 37, 35, 34, 35, 34, 25],
+                borderColor: "rgba(255,0,0,0.4)",
+                backgroundColor: "rgba(0,0,0,0)"
+            }],
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Investment profit'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMax: 200,
+                        suggestedMin: 0,
+                        stepSize: 50,
+                        callback: function(value, index, values) {
+                            return value + '%'
+                        }
+                    }
+                }]
+            },
+            legend: {
+                labels: {
+                    filter: function(items) {
+                        return items.text != '';
+                    }
+                }
+            },
+        }
+    });
+</script>
+
+
+{% endblock %}

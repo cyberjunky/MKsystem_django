@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache">
+
+    <link href="{% static 'MKsystemApp/css/base.css' %}" rel="stylesheet">
+    <!-- bootstrap4 -->
+    {% load bootstrap4 %} {% bootstrap_css %} {% bootstrap_javascript jquery='full' %}
+    <!-- bootstrap4 -->
+
+    <!-- <link href="https://pagecdn.io/lib/tailwindcss/1.6.2/tailwind.css" rel="stylesheet" crossorigin="anonymous"  > -->
+    <link href="{% static 'MKsystemApp/css/navbar.css' %}" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+</head>
+
+<body class="bg-gray-200 ">
+    <div class="logo">
+        <img src="{% static 'MKsystemApp/image/cait_logo_04.jpg' %}" />
+    </div>
+
+    {% include 'MKsystemApp/components/navbar.html' %} {% if messages %} {% for message in messages %}
+    <div class="text-center border py-2">
+        {{ message }}
+    </div>
+    {% endfor %} {% endif %}
+    <div class="container mx-auto mb-5 w-auto" style="height: 100%;">
+        {% block content %}{% endblock %}
+    </div>
+    <style>
+        label.required::after {
+            content: '*';
+        }
+    </style>
+    {% block style %}{% endblock %}

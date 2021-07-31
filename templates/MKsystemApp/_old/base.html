@@ -1,0 +1,41 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache">
+
+    <link href="{% static 'MKsystemApp/css/base.css' %}" rel="stylesheet">
+    <!-- bootstrap4 -->
+    {% load bootstrap4 %} {% bootstrap_css %} {% bootstrap_javascript jquery='full' %}
+    <!-- bootstrap4 -->
+
+    <!-- <link href="https://pagecdn.io/lib/tailwindcss/1.6.2/tailwind.css" rel="stylesheet" crossorigin="anonymous"  > -->
+    <link href="{% static 'MKsystemApp/css/navbar.css' %}" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-200 ">
+    <!-- <div class="jumbotron" style="background: url({% static 'MKsystemApp/logo.jpg' %}) center no-repeat;">
+    </div> -->
+    <div class="jumbotron text-center">
+
+        <h1>LOGO <img src="{% static 'MKsystemApp/image/logo_mk.png' %}" height="180"></h1>
+    </div>
+
+    {% include 'MKsystemApp/components/navbar.html' %} {% if messages %} {% for message in messages %}
+    <div class="text-center border py-2">
+        {{ message }}
+    </div>
+    {% endfor %} {% endif %}
+    <div class="container mx-auto mb-5 w-auto" style="height: 100%;">
+        {% block content %}{% endblock %}
+    </div>
+    <style>
+        label.required::after {
+            content: '*';
+        }
+    </style>
+    {% block style %}{% endblock %}

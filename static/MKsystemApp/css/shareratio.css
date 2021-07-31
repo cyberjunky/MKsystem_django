@@ -1,0 +1,7 @@
+.shareratio-form {
+    width: 160px;
+}
+
+[id*="input-"] {
+    text-align: right
+}

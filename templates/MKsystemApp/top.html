@@ -1,0 +1,614 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %} {% block content %}
+<link href="{% static 'MKsystemApp/css/top.css' %}" rel="stylesheet">
+<!-- スピナー -->
+<div id="overlay">
+    <div class="cv-spinner">
+        <span class="spinner"></span>
+    </div>
+</div>
+
+<div class="mx-auto text-center p-4">
+    <div id="getdate" class="text-right">
+        取得日時：<span>***</span>
+    </div>
+    <div id="rate" class="text-right">
+        変換レート：<span>***</span> USD/BTC
+    </div>
+    {% if user.is_superuser %}
+    <div class="superuser-menu">
+        <span class="box-title">管理者メニュー</span>
+        <h3 class="superuser text-left">運用</h3>
+        <div class="server-info ml-2">
+            <div class="server1 text-left mt-3">
+                <i class="fas fa-server mr-0"></i> Bot No.1
+            </div>
+            <div id="investment1" class="investment">
+                <p><span>***</span> BTC</p>
+                <p><span>***</span> USD</p>
+            </div>
+            <!-- 状況表示 -->
+            <div id="botstatus1" class="botstatus">
+                <div class="row mx-3 status">
+                    <!-- ランプ表示 -->
+                    <!-- <div class="orb">
+                        <div class="light"></div>
+                    </div> -->
+                    <div class="col-12 text-left">Status：<span>***</span></div>
+                    <!-- <div class="col-6 text-left"><span>yyyy/mm/dd HH:MM</span></div> -->
+                </div>
+                <div class="row mx-3 longshort">
+                    <div class="col-6 text-left">Long：<span>***</span></div>
+                    <div class="col-6 text-left">Short：<span>***</span></div>
+                </div>
+                <div class="row mx-3 profitloss">
+                    <div class="col-6 text-left">Profit：<span>***</span></div>
+                    <div class="col-6 text-left">Loss：<span>***</span></div>
+                </div>
+            </div>
+            <div class="server2 text-left mt-3">
+                <i class="fas fa-server mr-0"></i> Bot No.2
+            </div>
+            <div id="investment2" class="investment">
+                <p><span>***</span> BTC</p>
+                <p><span>***</span> USD</p>
+            </div>
+            <!-- 状況表示 -->
+            <div id="botstatus2" class="botstatus">
+                <div class="row mx-3 status">
+                    <!-- ランプ表示 -->
+                    <!-- <div class="orb">
+                        <div class="light"></div>
+                    </div> -->
+                    <div class="col-12 text-left">Status：<span>***</span></div>
+                    <!-- <div class="col-6 text-left"><span>yyyy/mm/dd HH:MM</span></div> -->
+                </div>
+                <div class="row mx-3">
+                    <div class="col-6 text-left">Long：<span>***</span></div>
+                    <div class="col-6 text-left">Short：<span>***</span></div>
+                </div>
+                <div class="row mx-3">
+                    <div class="col-6 text-left">Profit：<span>***</span></div>
+                    <div class="col-6 text-left">Loss：<span>***</span></div>
+                </div>
+            </div>
+            <div class="server3 text-left mt-3">
+                <i class="fas fa-server mr-0"></i> Bot No.3
+            </div>
+            <div id="investment2" class="investment">
+                <p><span>***</span> BTC</p>
+                <p><span>***</span> USD</p>
+            </div>
+            <!-- 状況表示 -->
+            <div id="botstatus3" class="botstatus">
+                <div class="row mx-3 status">
+                    <!-- ランプ表示 -->
+                    <!-- <div class="orb">
+                        <div class="light"></div>
+                    </div> -->
+                    <div class="col-12 text-left">Status：<span>***</span></div>
+                    <!-- <div class="col-6 text-left"><span>yyyy/mm/dd HH:MM</span></div> -->
+                </div>
+                <div class="row mx-3">
+                    <div class="col-6 text-left">Long：<span>***</span></div>
+                    <div class="col-6 text-left">Short：<span>***</span></div>
+                </div>
+                <div class="row mx-3">
+                    <div class="col-6 text-left">Profit：<span>***</span></div>
+                    <div class="col-6 text-left">Loss：<span>***</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <h3 class="text-left mt-5">運用</h3>
+    {% if Asset.is_accept %}
+    <div id="asset">
+        <p><span>***</span> BTC</p>
+        <p id="p-getrate">
+            <button id="button-getrate" class="btn btn-secondary mx-auto d-block mt-1" type="submit" disabled="true">USD変換</button>
+        </p>
+        <p id="usdrate"><span>***</span> USD</p>
+    </div>
+    {% else %}
+    <div class="text-danger">※運用が開始されていません。</div>
+    {% endif %}
+
+    <h3 class="profit text-left mt-5">運用推移</h3>
+    <!-- <div id="income">
+        <p><span>***</span> BTC</p>
+        <p><span>***</span> USD</p>
+    </div> -->
+    {% if Asset.is_accept %}
+    <canvas id="chart-asset"></canvas>
+    {% else %}
+    <div class="text-danger">※運用が開始されていません。</div>
+    {% endif %}
+
+    <!-- 運用停止する場合 -->
+    {% if Asset.is_accept %}
+    <form method="post" class="mt-5">
+        {% csrf_token %}
+        <input type="hidden" name="is_accept" value="false">
+        <button class="btn btn-secondary">運用停止</button>
+    </form>
+    {% endif %}
+
+    <!-- モーダルウィンドウ -->
+    <!-- <dialog> -->
+    <div id="modal-content">
+        <div class="text-danger">※運用が開始されていません。</div>
+        <div class="text-left">運用開始をする前に下記の注意事項を読み確認のうえ、承諾ボタンを押してください。</div>
+        
+        <p class="mt-3">{{user.family_name}}様の資産</p>
+        <p id="asset-prepare"><span>{{Asset.asset}}</span> BTC</p>
+
+        <p class="text-left mb-0">注意事項</p>
+        <div  id="disclaimer" class="overflow-auto text-left border" style="height:100px;">
+            暗号資産交換業者が取り扱う暗号資産（仮想通貨）は、当該暗号通貨交換業者の説明に基づき、資金決済法上の定義に該当することを確認したものにすぎません。<br>
+            金融庁・財務局が、これらの暗号資産（仮想通貨）の価値を保証したり、推奨するものではありません。暗号資産（仮想通貨）は、必ずしも裏付けとなる資産を持つものではありません。暗号資産（仮想通貨）の取引を行う際には、以下の注意点にご留意ください。<br>
+            [暗号資産（仮想通貨）を利用する際の注意点]<br>
+            暗号資産（仮想通貨）は、日本円やドルなどのように国がその価値を保証している「法定通貨」ではありません、インターネット上でやりとりされる電子データです。暗号資産（仮想通貨）は、価格が変動することがあります。暗号資産（仮想通貨）の価格が急落し、損をする可能性があります。<br>
+            自己の責任をおいて、暗号資産（仮想通貨）の取引を行ってください。
+        </div>
+
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <!-- <div class="input-group"> -->
+                <input type="hidden" name="is_accept" value="true">
+                <button class="mr-5 btn btn-primary">承諾</button>
+                <div id="modal-close" class="pull-right btn btn-secondary">閉じる</div>
+            <!-- </div> -->
+        </form>
+    <!-- </dialog> -->
+    </div>
+</div>
+
+<script>
+    // モーダルウィンドウ
+    // 以下はiOSが使えない
+    // var dialog = document.querySelector('dialog');
+    // var btn_close = document.getElementById('modalclose');
+    // btn_close.addEventListener('click', function() {
+    //     dialog.close();
+    // }, false);
+    // function showmodal(){
+    //     dialog.showModal();
+    // }
+
+    function showmodal(){
+        if($("#modal-overlay")[0]) $("#modal-overlay").remove() ;		//現在のモーダルウィンドウを削除して新しく起動する [上とどちらか選択]
+        $("body").append('<div id="modal-overlay"></div>');
+        
+        //オーバーレイをフェードインさせる
+        $("#modal-overlay").fadeIn("slow");
+        $("#asset-prepare > span").html(Number("{{Asset.asset}}").toFixed(4))
+        centeringModalSyncer();
+        $("#modal-content").fadeIn("slow");
+    }
+    //センタリングをする関数
+    function centeringModalSyncer(){
+        var w = $(window).width();
+        var h = $(window).height();
+        var cw = $("#modal-content").outerWidth(true);
+        var ch = $("#modal-content").outerHeight(true);
+        var pxleft = ((w - cw)/2);
+        var pxtop = ((h - ch)/2);
+        $("#modal-content").css({"left": pxleft + "px"});
+        $("#modal-content").css({"top": pxtop + "px"});
+    }
+
+    $("#modal-overlay,#modal-close").click(function(){
+        $("#modal-content,#modal-overlay").fadeOut("slow",function(){
+            $("#modal-overlay").remove();
+        });
+    });
+
+
+    // 入金処理が終り、運用開始が押されていない場合はモーダル画面を出す。
+    // 画面ロード時に管理者かユーザーで処理を分ける
+    // USD/BTCレートの取得後、BOTの資産取得
+    $(window).on('load', function() {
+
+        // 運用停止直後は抜ける
+        // var elements = document.getElementsByTagName('*');
+        // for(var i = 0; i < elements.length; ++i){
+        //     if(elements[i].localName != "div"){
+        //         continue;
+        //     }
+        //     if (elements[i].innerText == "運用停止しました。") {
+        //         return;
+        //     }
+        // }
+
+        // 管理者判断
+        var is_superuser = false;
+        {% if user.is_superuser %}
+        is_superuser = true;
+        {% endif %}
+        // alert(is_superuser);
+
+        // 管理者の場合BOTの状態取得
+        // if(is_superuser){
+        //     get_botstatus();
+        // }
+
+        // 資産取得
+        var asset = Number("{{Asset.asset}}");
+        var is_accept = false;
+        {% if Asset.is_accept %}
+        is_accept = true;
+        {% endif %}
+        
+        // 運用開始しているか判断
+        // if(!is_superuser && asset>0){
+        if(asset>0){
+            // 運用開始していなかったらモーダル画面表示
+            if(!is_accept){
+                showmodal();
+                return;
+            }
+        }
+
+        $("#overlay").fadeIn(300);
+        var $csrf_token = getCookie("csrftoken");
+        var rate_btcusd = 0;
+        // var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        $.when(
+            $.ajax({
+                // url: "get_usdrate",
+                url: "read_exchange",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $csrf_token
+                },
+                timeout: 3000,
+                dataType: "json",
+            }).done(function(data) {
+                rate_btcusd = data[1];
+                $("#rate>span").html(rate_btcusd);
+                $("#getdate>span").html(data[2]);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                $("#rate>span").html("Error");
+                $("#overlay").fadeOut(300);
+            })
+        ).done(function() {
+            // 取得日時の表示
+            // $("#getdate>span").html(getDispDate());
+
+            // when doneでは処理が上手くいかない
+            // $.when(
+            //     // BOT No1の資産取得
+            //     getbotbalance(1)
+            // ).done(function() {
+            //     // BOT No2の資産取得
+            //     getbotbalance(2);
+            //     // すべてが終わったらスピナー解除
+            //     $("#overlay").fadeOut(300);
+            // });
+
+            // 管理者でない場合終了
+            // var ele = document.getElementsByClassName("superuser-menu");
+            // if (ele == null) {
+            //     $("#overlay").fadeOut(300);
+            //     return
+            // }
+
+            // 管理者の場合BOTの資産取得、状況取得
+            if(is_superuser){
+                var deferred1 = getbotbalance(1, rate_btcusd);
+                deferred1.done(function() {
+                    var deferred2 = getbotbalance(2, rate_btcusd);
+                    deferred2.done(function() {
+                        $("#overlay").fadeOut(300);
+                    });
+                    deferred2.fail(function() {
+                        $("#overlay").fadeOut(300);
+                    });
+                });
+                deferred1.fail(function() {
+                    $("#overlay").fadeOut(300);
+                });
+                // Botの状況取得
+                get_botstatus();
+            }else{
+                $("#overlay").fadeOut(300);
+            }
+            
+            // 資産の反映
+            disp_asset(rate_btcusd, asset);
+
+            // チャートの描画
+            draw_chart(asset);
+
+        });
+    });
+
+    // 資産の表示
+    function disp_asset(rate_btcusd, asset) {
+        var element = $("#asset>p:eq(0)>span");
+        time_interval = 15;
+
+        element.each(function() {
+            var self = $(this),
+                count_max = 100,
+                count = 0,
+                countTimer;
+
+            function timer() {
+                countTimer = setInterval(function() {
+                    count++;
+                    var calc_num = asset / count_max * count;
+                    self.text(calc_num.toFixed(8));
+
+                    if (count >= count_max) {
+                        clearInterval(countTimer);
+                        self.hide().fadeIn('slow');
+                        // calc_usd(0, rate_btcusd, asset);
+                        // レート取得ボタンを有効化する
+                        $("#button-getrate").attr("disabled", false);
+                        $("#asset>p:eq(1)>span").hide().fadeIn('slow');
+                    }
+                }, time_interval);
+            }
+            timer();
+        });
+    }
+
+    // ボタンを押したときにUSDレート変換する
+    $("#button-getrate").on('click', function() {
+        var rate_btcusd = $("#rate>span").text();
+        if (rate_btcusd == "***"){
+            return;
+        }
+        var asset = Number("{{Asset.asset}}");
+        calc_usd(0, rate_btcusd, asset);
+        // ボタンを非表示
+        $("#p-getrate").hide();
+        $("#usdrate").fadeIn('slow');
+    })
+
+    // bot資産の取得
+    function getbotbalance(bot_no, rate_btcusd) {
+        //完了を知らせるためにDeferredオブジェクトを生成しそれを返す
+        var deferred = new $.Deferred();
+
+        var total_btc = 0;
+        var $csrf_token = getCookie("csrftoken");
+        // var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        // $.when $.doneを使うとajaxが終わってから実行する
+        $.when(
+            $.ajax({
+                url: "get_balance",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $csrf_token
+                },
+                data: {
+                    bot_no: bot_no,
+                },
+                timeout: 3000,
+                dataType: "json",
+            }).done(function(data) {
+                total_btc = data["total_btc"];
+                $("#investment" + bot_no + ">p:eq(0)>span").html(total_btc);
+                //ajax処理を終了したことをDeferredオブジェクトに通知
+                deferred.resolve();
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                $("#investment" + bot_no + ">p:eq(0)>span").html("error");
+                $("#investment" + bot_no + ">p:eq(1)>span").html("error");
+                deferred.reject();
+            })
+        ).done(function() {
+            // USDに変換
+            if (total_btc != 0) {
+                calc_usd(bot_no, rate_btcusd, total_btc);
+            }
+        });
+        return deferred;
+    }
+
+    // 取得日時の表示
+    function getDispDate() {
+        var now = new Date();
+        var year = now.getFullYear();
+        var mon = now.getMonth() + 1; //１を足すこと
+        var day = now.getDate();
+        var int_dayaweek = now.getDay(); //曜日(0～6=日～土)
+        var hour = now.getHours();
+        var min = now.getMinutes();
+        var sec = ('00' + now.getSeconds()).slice(-2);
+        //曜日の選択肢
+        var arr_dayaweek = new Array("日", "月", "火", "水", "木", "金", "土");
+        //出力用
+        var ret = year + "年" + mon + "月" + day + "日<br>" +
+            hour + "時" + min + "分" + sec + "秒";
+        return ret;
+    }
+
+    // USDに変換
+    function calc_usd(bot_no, rate_btcusd, total_btc) {
+        var usd = rate_btcusd * total_btc;
+        if (bot_no > 0) {
+            $("#investment" + bot_no + ">p:eq(1)>span").html(usd.toFixed(2));
+        } else {
+            $("#asset>p:eq(2)>span").html(usd.toFixed(2));
+        }
+
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // function csrfSafeMethod(method) {
+    //     // these HTTP methods do not require CSRF protection
+    //     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    // }
+
+    // チャート表示
+    function draw_chart(asset) {
+        var $csrf_token = getCookie("csrftoken");
+        var ctx = document.getElementById("chart-asset").getContext('2d');
+        ctx.canvas.height = 200;
+        var chartdata;
+        $.when(
+            $.ajax({
+                url: "get_assetdata",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $csrf_token
+                },
+                timeout: 3000,
+                dataType: "json",
+            }).done(function(data) {
+                chartdata = data;
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                $("#chart-asset").html("Error");
+            })
+        ).done(function() {
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartdata["date"],
+                    datasets: [{
+                        label: '',
+                        data: chartdata["asset"],
+                        borderColor: "rgba(255,0,0,0.4)",
+                        backgroundColor: "rgba(0,0,0,0)"
+                    }],
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'asset'
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                suggestedMax: asset*1.1,
+                                suggestedMin: asset*0.9,
+                                stepSize: asset*0.2/8,
+                                callback: function(value, index, values) {
+                                    return value.toFixed(2) + 'BTC'
+                                }
+                            }
+                        }]
+                    },
+                    legend: {
+                        labels: {
+                            filter: function(items) {
+                                return items.text != '';
+                            }
+                        }
+                    },
+                }
+            });
+        })
+    }
+
+    // botの状況取得
+    function get_botstatus() {
+        var $csrf_token = getCookie("csrftoken");
+        var bot_no = 1;
+        $.when(
+            $.ajax({
+                url: "get_botstatus",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $csrf_token
+                },
+                data: {
+                },
+                timeout: 3000,
+                dataType: "json",
+            }).done(function(data) {
+                // Botそれぞれの状況反映
+                write_botstatus(false, "1", data);
+                write_botstatus(false, "2", data);
+                write_botstatus(false, "3", data);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                write_botstatus(true, "1");
+                write_botstatus(true, "2");
+                write_botstatus(true, "3");
+            })
+        ).done(function() {
+
+        });
+    }
+
+    function write_botstatus(is_ajax_error, bot_no, data=""){
+        // Ajaxのエラーの場合
+        if(is_ajax_error){
+            $("#botstatus" + bot_no).css('background-color', 'rgba(255, 0, 0, 1.0)');
+            $("#botstatus" + bot_no + ">.status>div:eq(0)>span").html("Ajax error");
+            $("#botstatus" + bot_no + ">.longshort>div:eq(0)>span").html("***");
+            $("#botstatus" + bot_no + ">.longshort>div:eq(1)>span").html("***");
+            $("#botstatus" + bot_no + ">.profitloss>div:eq(0)>span").html("***");
+            $("#botstatus" + bot_no + ">.profitloss>div:eq(1)>span").html("***");
+            return;
+        }
+        // Ajaxの結果が正常に返ってきた場合
+        if(data["bot" + bot_no] != ""){
+            if(data["bot" + bot_no][2] == "running"){
+                $("#botstatus" + bot_no).css('background-color', 'rgba(0, 255, 34, 0.1)');
+            }
+            else if(data["bot" + bot_no][2] == "error"){
+                $("#botstatus" + bot_no).css('background-color', 'rgba(255, 0, 0, 1.0)');
+            }
+            else{
+                $("#botstatus" + bot_no).css('background-color', 'rgba(255, 255, 0, 0.1)');
+            }
+            $("#botstatus" + bot_no + ">.status>div:eq(0)>span").html(data["bot" + bot_no][2]);
+            $("#botstatus" + bot_no + ">.longshort>div:eq(0)>span").html(data["bot" + bot_no][3]);
+            $("#botstatus" + bot_no + ">.longshort>div:eq(1)>span").html(data["bot" + bot_no][4]);
+            $("#botstatus" + bot_no + ">.profitloss>div:eq(0)>span").html(data["bot" + bot_no][5]);
+            $("#botstatus" + bot_no + ">.profitloss>div:eq(1)>span").html(data["bot" + bot_no][6]);
+        } 
+        // Ajaxの結果が返ってきたが、状態の取得がきなかった場合
+        else{
+            $("#botstatus" + bot_no).css('background-color', 'rgba(0, 0, 0, 0.1)');
+            $("#botstatus" + bot_no + ">.status>div:eq(0)>span").html("Not exist");
+            $("#botstatus" + bot_no + ">.longshort>div:eq(0)>span").html("***");
+            $("#botstatus" + bot_no + ">.longshort>div:eq(1)>span").html("***");
+            $("#botstatus" + bot_no + ">.profitloss>div:eq(0)>span").html("***");
+            $("#botstatus" + bot_no + ">.profitloss>div:eq(1)>span").html("***");
+        }
+        
+    }
+
+    // USD/BTCレートの取得 定期処理
+    // $(function() {
+    //     setInterval(function() {
+    //         $("#overlay").fadeIn(300);
+    //         var $csrf_token = getCookie("csrftoken");
+    //         // var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+    //         $.ajax({
+    //             url: "get_usdrate",
+    //             method: "POST",
+    //             headers: {
+    //                 "X-CSRFToken": $csrf_token
+    //             },
+    //             timeout: 1000,
+    //             dataType: "text",
+    //         }).done(function(data) {
+    //             $("#overlay").fadeOut(300);
+    //             $("#rate>p>span").html(data);
+    //         })
+    //     }, 10000);
+    // });
+</script>
+
+{% endblock %}

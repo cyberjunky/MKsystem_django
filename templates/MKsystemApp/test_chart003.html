@@ -1,0 +1,86 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %} {% block content %}
+
+<h1>折れ線グラフ</h1>
+<canvas id="chart-profit"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+
+<script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $(window).on('load', function() {
+        var $csrf_token = getCookie("csrftoken");
+        var ctx = document.getElementById("chart-profit").getContext('2d');
+        ctx.canvas.height = 300;
+        var chartdata;
+        $.when(
+            $.ajax({
+                url: "get_profitdata",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $csrf_token
+                },
+                timeout: 1000,
+                dataType: "json",
+            }).done(function(data) {
+                chartdata = data;
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                // $("#chart-profit").html("Error");
+            })
+        ).done(function() {
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartdata["date"],
+                    datasets: [{
+                        label: '',
+                        data: chartdata["profit"],
+                        borderColor: "rgba(255,0,0,0.4)",
+                        backgroundColor: "rgba(0,0,0,0)"
+                    }],
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Investment profit'
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                suggestedMax: 200,
+                                suggestedMin: 0,
+                                stepSize: 50,
+                                callback: function(value, index, values) {
+                                    return value + '%'
+                                }
+                            }
+                        }]
+                    },
+                    legend: {
+                        labels: {
+                            filter: function(items) {
+                                return items.text != '';
+                            }
+                        }
+                    },
+                }
+            });
+        })
+    });
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %}{% block content %}
+<link href="{% static 'MKsystemApp/css/shareratio.css' %}" rel="stylesheet">
+<div class="mx-auto mt-5 p-4 w-full overflow-x-auto">
+
+    <table class="table">
+        <thead class="thead-light">
+            <tr class="">
+                <th class="text-center">ランク</th>
+                <th class="text-center">ID</th>
+                <th class="text-center">姓</th>
+                <th class="text-center">名</th>
+                <th class="text-center">配当比率</th>
+                <th class="text-center">操作</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in object_list %}
+            <tr class="border">
+                <td class="text-center px-2">{{ u.get_rank_display }}</td>
+                <td class="text-center px-2">{{ u.user_id }}</td>
+                <td class="text-center px-2">{{ u.family_name }}</td>
+                <td class="text-center px-2">{{ u.first_name }}</td>
+                <td id="shareratio-{{ u.user_id }}" class="text-center px-2">
+                </td>
+                <td class="text-center">
+                    <!-- form-inlineで横並びにしたいが上手くいかない -->
+                    <form method="POST" class="form-inline shareratio-form">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="hidden" name="user_id" value="{{ u.user_id }}">
+                            <input id="input-{{ u.user_id }}" name="share_ratio" class="form-control mr-1">
+                            <input class="btn btn-primary" type="submit" value="変更">
+                            <!-- <div id="button-{{ u.user_id }}" class="btn btn-primary" type="submit">変更</button> -->
+                        </div>
+                    </form>
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    <!-- モーダルウィンドウ -->
+    <dialog>
+        <p>入金額は0.0001BTC以上にしてください。</p>
+        <div id="modalclose" class="btn btn-secondary">OK</div>
+    </dialog>
+</div>
+{% endblock %} {% block style %}
+<style>
+    th,
+    td {
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    // モーダルウィンドウ
+    var dialog = document.querySelector('dialog');
+    var btn_close = document.getElementById('modalclose');
+    btn_close.addEventListener('click', function() {
+        dialog.close();
+    }, false);
+
+    function showmodal(){
+        dialog.showModal();
+    }
+
+    // 配当比率の反映
+    $(window).on('load', function() {
+        {% for u in object_list %}
+            {% for asset in asset_list %} 
+                {% if asset.user_id == u.user_id %} 
+                    $("#shareratio-" + "{{u.user_id}}").html({{ asset.share_ratio }}.toFixed(1)+" %");
+                {% endif %} 
+            {% endfor %}
+        {% endfor %}
+    });
+
+    // 変更ボタンを押したとき
+    $('div[id^="button-"]').on('click', function(event) {
+        // alert($(this).prev().value);
+        
+        var operate_id = this.id.replace("button-", "");
+        // 配当比率の取得
+        var input_value = $("#input-" + operate_id).val();
+        if(input_value < 0.0001){
+            showmodal();
+            return;
+        }
+        $('div[id^="button-"]').attr("disabled", true);
+        $("#overlay").fadeIn(300);
+
+        // event.preventDefault();
+        // var form = $(this);
+        var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        $.ajax({
+                url: "changedeposit",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $crf_token
+                },
+                data: {
+                    user_id: operate_id,
+                    deposit_value: input_value
+                },
+                // method: form.prop("method"),
+                // data: form.serialize(),
+                timeout: 3000,
+                dataType: "text",
+                cache: false,
+                beforeSend: function(xhr) {
+                    // 選択不可にする
+                    $('div[id^="button-"]').attr("disabled", true);
+                }
+            })
+            .done(function(data) {
+                $("#overlay").fadeOut(300);
+                // 設定値を反映する
+                $("#deposit-" + operate_id).hide();
+                $("#deposit-" + operate_id).html(Number(data).toFixed(4));
+                $("#deposit-" + operate_id).fadeIn("slow");
+                // 選択可能にする
+                $('div[id^="button-"]').attr("disabled", false);
+            })
+    });
+
+    // 何故かsubmitのPOSTはできない
+    // $('button[id^="button-"]').submit(function(event) {
+    //     // alert($(this).prev().value);
+    //     var operate_id = this.id.replace("button-", "");
+    //     // 入金額の取得
+    //     var input_value = $("#input-" + operate_id).val();
+
+    //     $('button[id^="button-"]').attr("disabled", true);
+    //     $("#overlay").fadeIn(300);
+
+    //     event.preventDefault();
+    //     var form = $(this);
+    //     // var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+    //     $.ajax({
+    //             url: "changedeposit",
+    //             // method: "POST",
+    //             // headers: {
+    //             //     "X-CSRFToken": $crf_token
+    //             // },
+    //             method: form.prop("method"),
+    //             data: form.serialize(),
+    //             timeout: 10000,
+    //             dataType: "text",
+    //             cache: false,
+    //             beforeSend: function(xhr) {
+    //                 // 選択不可にする
+    //                 $('button[id^="button-"]').attr("disabled", true);
+    //             }
+    //         })
+    //         .done(function(data) {
+    //             $("#overlay").fadeOut(300);
+    //             // 設定値を反映する
+    //             $("#deposit-" + operate_id).html(data);
+    //             // 選択可能にする
+    //             $('button[id^="button-"]').attr("disabled", false);
+    //         })
+    // });
+</script>
+{% endblock %}

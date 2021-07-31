@@ -1,0 +1,21 @@
+{% extends 'MKsystemApp/base.html' %} {% block content %}
+<div class="bg-white mx-auto mt-5 p-4 shadow" style="max-width: 600px;">
+    <form method="post">
+        {% csrf_token %} {{ form }}
+        <button class="btn btn-primary">更新</button>
+        <a href="{% url 'MKsystemApp:change_password' user.pk %}" class="p-2 bg-purple-400 border-2 text-white">パスワード変更</a>
+    </form>
+</div>
+<script>
+    // 画面が読み込まれてエラーが出てたらスクロールする
+    $(window).on('load', function() {
+        // 要素がないときは何もしない
+        if ($(".errorlist").length == 0) {
+            return
+        }
+        $("html,body").animate({
+            scrollTop: $(".errorlist").offset().top
+        }, 200);
+    });
+</script>
+{% endblock %}

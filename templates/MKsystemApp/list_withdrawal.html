@@ -1,0 +1,149 @@
+{% extends 'MKsystemApp/base.html' %} {% block content %}
+<!-- スピナー -->
+<div id="overlay">
+    <div class="cv-spinner">
+        <span class="spinner"></span>
+    </div>
+</div>
+
+<h2>出金依頼一覧</h2>
+<div class="mx-auto mt-5 p-4 w-full overflow-x-auto">
+    <table class="table">
+        <thead class="thead-light">
+            <tr class="">
+                <th>会員ID</th>
+                <th>姓</th>
+                <th>名</th>
+                <th>依頼日</th>
+                <th>依頼額</th>
+                <th>状況</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in object_list %}
+            <tr class="border">
+                <td class="text-center px-2">{{ u.user_id }}</td>
+                <td class="text-center px-2">
+                    {% for user in user_list %} 
+                        {% if user.user_id == u.user_id %} 
+                            {{ user.family_name }}
+                        {% endif %} 
+                    {% endfor %}
+                </td>
+                <td class="text-center px-2">
+                    {% for user in user_list %}
+                        {% if user.user_id == u.user_id %}
+                            {{ user.first_name }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <!-- <td class="text-center px-2">{{ u.date|date:'Y-m-d H:m' }}</td> -->
+                <td class="text-center px-2">{{ u.date }}</td>
+                <td class="text-center px-2">{{ u.value }}</td>
+                <td id="status-{{ u.id }}" class="text-center px-2">{{ u.status }}</td>
+                <td class="text-center px-2">
+                    <form method="POST">
+                        <select id="select-{{ u.id }}" name="select-value">
+                            <option value="sel-1">処理中</option>
+                            <option value="sel-2">処理済</option>
+                        </select> {% csrf_token %}
+                        <button id="change-{{ u.id }}" class="btn btn-primary" type="submit">変更</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} {% block style %}
+<style>
+    th,
+    td {
+        white-space: nowrap;
+    }
+</style>
+<!-- <div class="maintenance">※メンテナンス中</div> -->
+
+<script>
+    // 変更ボタンを押したとき
+    $('button[id^="change-"]').on('click', function(event) {
+        // alert($(this).prev().value);
+        var operate_id = this.id.replace("change-", "");
+        // 設定値の取得
+        var sel_value = $("#select-" + operate_id).val();
+
+        $('button[id^="change-"]').attr("disabled", true);
+        $("#overlay").fadeIn(300);
+
+        // event.preventDefault();
+        // var form = $(this);
+        var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        $.ajax({
+                url: "changestatus",
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": $crf_token
+                },
+                data: {
+                    id: operate_id,
+                    sel_value: sel_value
+                },
+                // method: form.prop("method"),
+                // data: form.serialize(),
+                timeout: 10000,
+                dataType: "text",
+                cache: false,
+                beforeSend: function(xhr) {
+                    // 選択不可にする
+                    $('button[id^="change-"]').attr("disabled", true);
+                }
+            })
+            .done(function(data) {
+                $("#overlay").fadeOut(300);
+                // 設定値を反映する
+                $("#status-" + operate_id).html(data);
+                // 選択可能にする
+                $('button[id^="change-"]').attr("disabled", false);
+            })
+    });
+
+    // 何故かsubmitのPOSTはできない
+    // $('button[id^="change-"]').submit(function(event) {
+    //     // alert($(this).prev().value);
+    //     var operate_id = this.id.replace("change-", "");
+    //     // alert($("#select-" + operate_id).val());
+    //     var sel_value = $("#select-" + operate_id).val();
+
+    //     $('button[id^="change-"]').attr("disabled", true);
+    //     $("#overlay").fadeIn(300);
+
+    //     event.preventDefault();
+    //     var form = $(this);
+    //     // var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+    //     $.ajax({
+    //             url: "changestatus",
+    //             // method: "POST",
+    //             // headers: {
+    //             //     "X-CSRFToken": $crf_token
+    //             // },
+    //             method: form.prop("method"),
+    //             data: form.serialize(),
+    //             timeout: 10000,
+    //             dataType: "text",
+    //             cache: false,
+    //             beforeSend: function(xhr) {
+    //                 // 選択不可にする
+    //                 $('button[id^="change-"]').attr("disabled", true);
+    //             }
+    //         })
+    //         .done(function(data) {
+    //             $("#overlay").fadeOut(300);
+    //             // 設定値を反映する
+    //             $("#status-" + operate_id).html(data);
+    //             // 選択可能にする
+    //             $('button[id^="change-"]').attr("disabled", false);
+    //         })
+    // });
+</script>
+{% endblock %}

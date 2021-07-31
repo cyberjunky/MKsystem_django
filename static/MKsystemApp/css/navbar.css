@@ -1,0 +1,6 @@
+.panel {
+    min-height: 80px;
+    background-color: cornflowerblue;
+    border: cornflowerblue;
+    border-radius: 5px;
+}

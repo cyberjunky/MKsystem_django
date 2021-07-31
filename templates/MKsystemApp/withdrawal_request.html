@@ -1,0 +1,94 @@
+{% extends 'MKsystemApp/base.html' %} {% load static %}{% block content %}
+<link href="{% static 'MKsystemApp/css/withdrawal_request.css' %}" rel="stylesheet">
+<h2>出金依頼</h2>
+<!-- <div class="maintenance">※メンテナンス中</div> -->
+
+<div class="bg-white mx-auto mt-5 p-4 shadow" style="max-width: 600px;">
+    <div>出金するBTC数を入力してください。</div>
+    <div>最小出金数量：0.001 BTC</div>
+    <div id="allow-asset" asset="{{ Asset.asset }}">
+        出金可能額：<span></span> BTC
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" value="{{ user.user_id }}">
+        <div>
+            <!-- {{ form }}にするとメッセージも出る -->
+            {{ form.value }}
+        </div>
+        <!-- エラー時の表示 -->
+        <!-- form.フィールド名.errorsで取り出せる -->
+        <!-- {% if form.errors %}
+        <ul id="errors" class="errorlist">
+            {% for error in form.value.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %} -->
+        <!-- form_invalidでmessagesを出したときはmessagesを使える -->
+        <!-- <div>
+            {% if messages %}
+            <ul class="messages_ul">
+                {% for message in messages %}
+                <li class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %} alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div> -->
+        <!-- forms.ValidationErrorはform.errorsに格納される -->
+        <div>
+            {% if form.errors %}
+            <ul id="errors" class="errorlist">
+                {% for error in form.value.errors %}
+                <li class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %} alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{{ error }}</li>
+                {% endfor %} {% for error in form.non_field_errors %}
+                <li class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %} alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <!-- <div class="text-right">
+            <button class="btn btn-primary">出金依頼</button>
+        </div> -->
+        <dialog>
+            <p><span></span> BTC出金しますがよろしいでしょうか？</p>
+            <button class="btn btn-primary">OK</button>
+            <div id="modalclose" class="btn btn-secondary">閉じる</div>
+        </dialog>
+        <div id="modalshow" class="btn btn-primary">出金依頼</div>
+    </form>
+</div>
+<script>
+    // モーダルダイアログ
+    var dialog = document.querySelector('dialog');
+    var btn_show = document.getElementById('modalshow');
+    var btn_close = document.getElementById('modalclose');
+    btn_show.addEventListener('click', function() {
+        // 出金額の取得
+        var value_req = $("input[name='value']").val();
+        $("dialog>p>span").text(value_req);
+        dialog.showModal();
+    }, false);
+    btn_close.addEventListener('click', function() {
+        dialog.close();
+    }, false);
+
+    // 出金可能額の小数点を正す
+    // 画面が読み込まれてエラーが出てたらスクロールする
+    $(window).on('load', function() {
+        // 出金可能額の小数点を正す
+        element = $('#allow-asset');
+        asset = Number(element.attr('asset'));
+        asset_floor = Math.floor(asset * Math.pow(10, 3)) / Math.pow(10, 3);
+        $('#allow-asset>span').text(asset_floor.toFixed(3));
+
+        // 要素がないときは何もしない
+        if ($('#errors').length == 0) {
+            return
+        }
+        $("html,body").animate({
+            scrollTop: $("#errors").offset().top
+        }, 200);
+    });
+</script>
+{% endblock %}

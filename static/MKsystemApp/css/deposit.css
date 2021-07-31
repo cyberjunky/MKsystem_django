@@ -1,0 +1,7 @@
+.deposit-form {
+    width: 200px;
+}
+
+[id*="input-"] {
+    text-align: right
+}

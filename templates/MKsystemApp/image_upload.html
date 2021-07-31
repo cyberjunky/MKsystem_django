@@ -1,0 +1,22 @@
+{% extends 'MKsystemApp/base.html' %} {% block content %}
+<div class="bg-white mx-auto mt-5 p-4 shadow" style="max-width: 600px;">
+    <div>{{ user.family_name }}様がアップロードした画像は{{ image_count }}枚です。</div>
+
+    <form enctype="multipart/form-data" action="{% url 'MKsystemApp:image_upload' user.pk %}" method="post">
+        {% csrf_token %}
+        <div class="my-5">{{ form.picture }}</div>
+        <img id="preview" class="mb-5 w-100">
+        <input class="btn btn-primary" type="submit" value="Upload">
+    </form>
+    
+</div>
+<script>
+    $('input[name="picture"]').on('change', function (e) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        $("#preview").attr('src', e.target.result);
+    }
+    reader.readAsDataURL(e.target.files[0]);
+});
+</script>
+{% endblock %}
