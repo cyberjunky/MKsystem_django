@@ -1,76 +1,34 @@
 from django.http import HttpResponse
-import json
-import ccxt
-import requests
-import time
 import os
-import subprocess
+import json
 
-
-if __name__ == '__main__':
-    dict_balance = {}
-    bykeyjson = open("apikey_bot{}.json".format(2), "r")
-    bykey = json.load(bykeyjson)
-    ccxt_bybit = ccxt.bybit(bykey)
-    balance = ccxt_bybit.fetch_balance()
-    dict_balance["total_btc"] = balance['BTC']['total']
-    dict_balance["free_btc"] = balance['BTC']['free']
+nameFolder = 'botstatus'
+# デバッグの時はこっち
+# nameFolder = '../../botstatus'
     
-    proc = subprocess.Popen("net start w32time", shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
-    ret = proc.communicate()[0].decode('cp932')
-    print(ret)
-    time.sleep(1)
-    proc = subprocess.Popen("w32tm /resync", shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)  # DEVNULL
-    ret = proc.communicate()[0].decode('cp932')
-    print(ret)
+def get_filedata(dict_botstatus, bot_no):
+    if os.path.exists(nameFolder + "/bot{}.txt".format(bot_no)):
+        file_txt = open(nameFolder + "/bot{}.txt".format(bot_no), "r")
+        lines = file_txt.readlines()
+        if len(lines) > 0:
+            line = lines[-1].replace("\n", "").split(" ")
+        else:
+            line = ""
+        dict_botstatus["bot{}".format(bot_no)] = line
+    else:
+        dict_botstatus["bot{}".format(bot_no)] = ""
     
-def get_balance(bot_no):
-    # まず時刻合わせする
-    if bot_no == "1":
-        proc = subprocess.Popen("net start w32time", shell=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)
-        ret = proc.communicate()[0].decode('cp932')
-        time.sleep(1)
-        proc = subprocess.Popen("w32tm /resync", shell=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT)  # DEVNULL
-        ret = proc.communicate()[0].decode('cp932')
+    return dict_botstatus
+    
 
-    # print(os.getcwd())
-    # if __name__ == '__main__':
-    dict_balance = {}
-    bykeyjson = open("apikey_bot{}.json".format(bot_no), "r")
-    bykey = json.load(bykeyjson)
-    ccxt_bybit = ccxt.bybit(bykey)
-
-    balance = ccxt_bybit.fetch_balance()
-    dict_balance["total_btc"] = balance['BTC']['total']
-    dict_balance["free_btc"] = balance['BTC']['free']
-
-    return HttpResponse(json.dumps(dict_balance))
-    # print(json.dumps(dict_balance))
+def get_botstatus():
+    dict_botstatus = {}
+    
+    # それぞれのBotの状態を取得
+    dict_botstatus = get_filedata(dict_botstatus, "1")
+    dict_botstatus = get_filedata(dict_botstatus, "2")
+    dict_botstatus = get_filedata(dict_botstatus, "3")
+ 
+    return HttpResponse(json.dumps(dict_botstatus))
 
 
-def get_usdrate():
-    # time.sleep(10)
-    URL = "https://api.coingecko.com/api/v3"
-    endpoint = "/coins/"
-    coins = "bitcoin"
-    url = URL + endpoint + coins
-    req = requests.request("GET", url)
-    str_json = req.json()
-
-    last_ticker = 0
-    list_tickers = str_json["tickers"]
-    for ticker in list_tickers:
-        if ticker["base"] == "BTC" and \
-            ticker["target"] == "USD" and \
-            ticker["market"]["name"] == "FTX.US":
-            last_ticker = ticker["last"]
-            break
-    return HttpResponse(last_ticker)
